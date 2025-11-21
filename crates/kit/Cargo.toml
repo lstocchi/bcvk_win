@@ -1,0 +1,27 @@
+[package]
+name = "bcvk_win"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+camino = "1.1.12"
+cap-std-ext = { git = "https://github.com/coreos/cap-std-ext", rev = "cfdb25d51ffc697e70aa0d8d3cefe9ec2133bd0a" }
+chrono = { version = "0.4", features = ["serde"] }
+color-eyre = { workspace = true }
+comfy-table = "7.1"
+clap = { version = "4.4", features = ["derive"] }
+indicatif = "0.17"
+indoc = "2.0.6"
+oci-spec = "0.8.2"
+rustix = { version = "1", features = ["thread", "net", "fs", "pipe", "system", "process", "mount"] }
+serde = { version = "1.0.199", features = ["derive"] }
+serde_json = "1.0.116"
+sha2 = "0.10"
+shlex = "1"
+strum = { version = "0.26", features = ["derive"] }
+tempfile = "3"
+thiserror = "1.0"
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing-error = { workspace = true }
+win_ads = "0.1"

@@ -1,0 +1,13 @@
+#cloud-config
+users:
+  - name: test
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG8OaY3XvKrnpSny2A4lgBFIVWUxYQsn5kkqPSit9edo baldr@LucaW11
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    lock_passwd: false
+
+chpasswd:
+  expire: false
+
+ssh_pwauth: true
