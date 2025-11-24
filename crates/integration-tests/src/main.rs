@@ -187,6 +187,16 @@ fn test_images_list() -> Result<()> {
 integration_test!(test_images_list);
 
 fn main() {
+    // Integration tests are only supported on Linux
+    if std::env::consts::OS != "linux" {
+        eprintln!(
+            "Integration tests are only supported on Linux (current OS: {})",
+            std::env::consts::OS
+        );
+        eprintln!("Skipping all integration tests.");
+        std::process::exit(0);
+    }
+
     let args = Arguments::from_args();
 
     let mut tests: Vec<Trial> = Vec::new();

@@ -1,35 +1,60 @@
 //! Bootc Virtualization Kit (bcvk) - A toolkit for bootc containers and local virtualization
 
-use cap_std_ext::cap_std::fs::Dir;
 use clap::{Parser, Subcommand};
 use color_eyre::{eyre::Context as _, Report, Result};
 
+#[cfg(target_os = "linux")]
 mod arch;
+#[cfg(target_os = "linux")]
 mod boot_progress;
+#[cfg(target_os = "linux")]
 mod cache_metadata;
+#[cfg(target_os = "linux")]
 mod cli_json;
+#[cfg(target_os = "linux")]
 mod common_opts;
+#[cfg(target_os = "linux")]
 mod container_entrypoint;
+#[cfg(target_os = "linux")]
 mod credentials;
+#[cfg(target_os = "linux")]
 mod domain_list;
+#[cfg(target_os = "linux")]
 mod ephemeral;
+#[cfg(target_os = "linux")]
 mod images;
+#[cfg(target_os = "linux")]
 mod install_options;
+#[cfg(target_os = "linux")]
 mod instancetypes;
+#[cfg(target_os = "linux")]
 mod libvirt;
+#[cfg(target_os = "linux")]
 mod libvirt_upload_disk;
+#[cfg(target_os = "linux")]
 #[allow(dead_code)]
 mod podman;
+#[cfg(target_os = "linux")]
 mod qemu;
+#[cfg(target_os = "linux")]
 mod qemu_img;
+#[cfg(target_os = "linux")]
 mod run_ephemeral;
+#[cfg(target_os = "linux")]
 mod run_ephemeral_ssh;
+#[cfg(target_os = "linux")]
 mod ssh;
+#[cfg(target_os = "linux")]
 mod status_monitor;
+#[cfg(target_os = "linux")]
 mod supervisor_status;
+#[cfg(target_os = "linux")]
 pub(crate) mod systemd;
+#[cfg(target_os = "linux")]
 mod to_disk;
+#[cfg(target_os = "linux")]
 mod utils;
+#[cfg(target_os = "linux")]
 mod xml_utils;
 
 /// Default state directory for bcvk container data
@@ -77,18 +102,22 @@ enum InternalsCmds {
 #[derive(Subcommand)]
 enum Commands {
     /// Manage and inspect bootc container images
+    #[cfg(target_os = "linux")]
     #[clap(subcommand)]
     Images(images::ImagesOpts),
 
     /// Manage ephemeral VMs for bootc containers
+    #[cfg(target_os = "linux")]
     #[clap(subcommand)]
     Ephemeral(ephemeral::EphemeralCommands),
 
     /// Install bootc images to persistent disk images
+    #[cfg(target_os = "linux")]
     #[clap(name = "to-disk")]
     ToDisk(to_disk::ToDiskOpts),
 
     /// Manage libvirt integration for bootc containers
+    #[cfg(target_os = "linux")]
     Libvirt {
         /// Hypervisor connection URI (e.g., qemu:///system, qemu+ssh://host/system)
         #[clap(short = 'c', long = "connect", global = true)]
@@ -99,18 +128,22 @@ enum Commands {
     },
 
     /// Upload bootc disk images to libvirt (deprecated)
+    #[cfg(target_os = "linux")]
     #[clap(name = "libvirt-upload-disk", hide = true)]
     LibvirtUploadDisk(libvirt_upload_disk::LibvirtUploadDiskOpts),
 
     /// Internal container entrypoint command (hidden from help)
+    #[cfg(target_os = "linux")]
     #[clap(hide = true)]
     ContainerEntrypoint(container_entrypoint::ContainerEntrypointOpts),
 
     /// Internal debugging and diagnostic tools (hidden from help)
+    #[cfg(target_os = "linux")]
     #[clap(hide = true)]
     DebugInternals(DebugInternalsOpts),
 
     /// Internal diagnostic and tooling commands for development
+    #[cfg(target_os = "linux")]
     #[clap(hide = true)]
     Internals(InternalsOpts),
 }
@@ -158,11 +191,15 @@ fn main() -> Result<(), Report> {
         .context("Init tokio runtime")?;
 
     match cli.command {
+        #[cfg(target_os = "linux")]
         Commands::Images(opts) => opts.run()?,
+        #[cfg(target_os = "linux")]
         Commands::Ephemeral(cmd) => cmd.run()?,
+        #[cfg(target_os = "linux")]
         Commands::ToDisk(opts) => {
             to_disk::run(opts)?;
         }
+        #[cfg(target_os = "linux")]
         Commands::Libvirt { connect, command } => {
             let options = libvirt::LibvirtOptions { connect };
             match command {
@@ -188,12 +225,14 @@ fn main() -> Result<(), Report> {
                 }
             }
         }
+        #[cfg(target_os = "linux")]
         Commands::LibvirtUploadDisk(opts) => {
             eprintln!(
                 "Warning: 'libvirt-upload-disk' is deprecated. Use 'libvirt upload' instead."
             );
             libvirt_upload_disk::run(opts)?;
         }
+        #[cfg(target_os = "linux")]
         Commands::ContainerEntrypoint(opts) => {
             // Create a tokio runtime for async container entrypoint operations
             rt.block_on(async move {
@@ -203,8 +242,10 @@ fn main() -> Result<(), Report> {
             })?;
             tracing::trace!("Exiting runtime");
         }
+        #[cfg(target_os = "linux")]
         Commands::DebugInternals(opts) => match opts.command {
             DebugInternalsCmds::OpenTree { path } => {
+                use cap_std_ext::cap_std::fs::Dir;
                 let fd = rustix::mount::open_tree(
                     rustix::fs::CWD,
                     path,
@@ -215,6 +256,7 @@ fn main() -> Result<(), Report> {
                 tracing::debug!("{:?}", fd.entries()?.into_iter().collect::<Vec<_>>());
             }
         },
+        #[cfg(target_os = "linux")]
         Commands::Internals(opts) => match opts.command {
             #[cfg(feature = "docgen")]
             InternalsCmds::DumpCliJson => {
