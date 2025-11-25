@@ -6,7 +6,7 @@ mod linux;
 #[cfg(not(target_os = "linux"))]
 mod fallback;
 
-pub use common::{generate_unique_vm_name, parse_memory_to_mb};
+pub use common::{generate_unique_vm_name, parse_memory_to_mb, parse_size};
 
 #[cfg(target_os = "linux")]
 pub use linux::{

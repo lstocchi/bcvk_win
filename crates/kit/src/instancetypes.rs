@@ -59,6 +59,7 @@ pub enum InstanceType {
     U1EightXLarge,
 }
 
+#[cfg(target_os = "linux")]
 impl InstanceType {
     /// Get the number of vCPUs for this instance type
     pub const fn vcpus(self) -> u32 {
@@ -93,6 +94,7 @@ impl InstanceType {
     }
 }
 
+#[cfg(target_os = "linux")]
 #[cfg(test)]
 mod tests {
     use super::*;

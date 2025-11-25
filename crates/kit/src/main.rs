@@ -22,11 +22,8 @@ mod domain_list;
 mod ephemeral;
 #[cfg(target_os = "windows")]
 mod hyperv;
-#[cfg(target_os = "linux")]
 mod images;
-#[cfg(target_os = "linux")]
 mod install_options;
-#[cfg(target_os = "linux")]
 mod instancetypes;
 #[cfg(target_os = "linux")]
 mod libvirt;
@@ -39,7 +36,6 @@ mod podman;
 mod qemu;
 #[cfg(target_os = "linux")]
 mod qemu_img;
-#[cfg(target_os = "linux")]
 mod run_ephemeral;
 #[cfg(target_os = "linux")]
 mod run_ephemeral_ssh;
@@ -51,7 +47,6 @@ mod status_monitor;
 mod supervisor_status;
 #[cfg(target_os = "linux")]
 pub(crate) mod systemd;
-#[cfg(target_os = "linux")]
 mod to_disk;
 mod utils;
 #[cfg(target_os = "linux")]
@@ -102,7 +97,6 @@ enum InternalsCmds {
 #[derive(Subcommand)]
 enum Commands {
     /// Manage and inspect bootc container images
-    #[cfg(target_os = "linux")]
     #[clap(subcommand)]
     Images(images::ImagesOpts),
 
@@ -112,7 +106,6 @@ enum Commands {
     Ephemeral(ephemeral::EphemeralCommands),
 
     /// Install bootc images to persistent disk images
-    #[cfg(target_os = "linux")]
     #[clap(name = "to-disk")]
     ToDisk(to_disk::ToDiskOpts),
 
@@ -197,11 +190,9 @@ fn main() -> Result<(), Report> {
         .context("Init tokio runtime")?;
 
     match cli.command {
-        #[cfg(target_os = "linux")]
         Commands::Images(opts) => opts.run()?,
         #[cfg(target_os = "linux")]
         Commands::Ephemeral(cmd) => cmd.run()?,
-        #[cfg(target_os = "linux")]
         Commands::ToDisk(opts) => {
             to_disk::run(opts)?;
         }

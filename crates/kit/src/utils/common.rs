@@ -104,3 +104,42 @@ pub fn generate_unique_vm_name(image: &str, existing_domains: &[String]) -> Stri
 
     candidate
 }
+
+/// Parse size string (e.g., "10G", "5120M", "1T") to bytes
+pub fn parse_size(size_str: &str) -> Result<u64> {
+    let size_str = size_str.trim().to_uppercase();
+
+    if size_str.is_empty() {
+        return Err(eyre!("Empty size string"));
+    }
+
+    // Try to strip known unit suffixes
+    let (number_str, multiplier) = if let Some(num) = size_str.strip_suffix("TB") {
+        (num, 1024_u64.pow(4))
+    } else if let Some(num) = size_str.strip_suffix("GB") {
+        (num, 1024 * 1024 * 1024)
+    } else if let Some(num) = size_str.strip_suffix("MB") {
+        (num, 1024 * 1024)
+    } else if let Some(num) = size_str.strip_suffix("KB") {
+        (num, 1024)
+    } else if let Some(num) = size_str.strip_suffix('T') {
+        (num, 1024_u64.pow(4))
+    } else if let Some(num) = size_str.strip_suffix('G') {
+        (num, 1024 * 1024 * 1024)
+    } else if let Some(num) = size_str.strip_suffix('M') {
+        (num, 1024 * 1024)
+    } else if let Some(num) = size_str.strip_suffix('K') {
+        (num, 1024)
+    } else if let Some(num) = size_str.strip_suffix('B') {
+        (num, 1)
+    } else {
+        // No unit suffix, assume bytes
+        (&*size_str, 1)
+    };
+
+    let number: u64 = number_str
+        .parse()
+        .map_err(|_| eyre!("Invalid number in size: {}", number_str))?;
+
+    Ok(number * multiplier)
+}

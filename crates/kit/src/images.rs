@@ -6,7 +6,7 @@
 use std::collections::HashMap;
 use std::process::Command;
 
-use bootc_utils::CommandRunExt;
+use crate::utils::CommandRunExt;
 use color_eyre::{eyre::eyre, Result};
 use comfy_table::{presets::UTF8_FULL, Table};
 use serde::{Deserialize, Serialize};
