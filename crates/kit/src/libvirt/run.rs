@@ -16,7 +16,7 @@ use crate::common_opts::MemoryOpts;
 use crate::domain_list::DomainLister;
 use crate::install_options::InstallOptions;
 use crate::libvirt::domain::VirtiofsFilesystem;
-use crate::utils::parse_memory_to_mb;
+use crate::utils::{generate_unique_vm_name, parse_memory_to_mb};
 use crate::xml_utils;
 
 /// SSH wait timeout in seconds
@@ -699,46 +699,6 @@ pub fn get_libvirt_storage_pool_path(connect_uri: Option<&str>) -> Result<Utf8Pa
     Err(color_eyre::eyre::eyre!(
         "Could not find path in storage pool XML"
     ))
-}
-
-/// Generate a unique VM name from an image name
-fn generate_unique_vm_name(image: &str, existing_domains: &[String]) -> String {
-    // Extract image name from full image path
-    let base_name = if let Some(last_slash) = image.rfind('/') {
-        &image[last_slash + 1..]
-    } else {
-        image
-    };
-
-    // Remove tag if present
-    let base_name = if let Some(colon) = base_name.find(':') {
-        &base_name[..colon]
-    } else {
-        base_name
-    };
-
-    // Sanitize name (replace invalid characters with hyphens)
-    let sanitized: String = base_name
-        .chars()
-        .map(|c| {
-            if c.is_alphanumeric() || c == '-' || c == '_' {
-                c
-            } else {
-                '-'
-            }
-        })
-        .collect();
-
-    // Find unique name by appending numbers
-    let mut candidate = sanitized.clone();
-    let mut counter = 1;
-
-    while existing_domains.contains(&candidate) {
-        counter += 1;
-        candidate = format!("{}-{}", sanitized, counter);
-    }
-
-    candidate
 }
 
 /// List all volumes in the default storage pool

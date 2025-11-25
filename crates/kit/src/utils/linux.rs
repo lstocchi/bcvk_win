@@ -98,7 +98,7 @@ pub(crate) fn impl_sealed_memfd(description: &str, content: &[u8]) -> Result<Own
 }
 
 /// Detect the container storage path using podman system info
-pub(crate) fn detect_container_storage_path() -> Result<Utf8PathBuf> {
+pub fn detect_container_storage_path() -> Result<Utf8PathBuf> {
     use std::process::Command;
 
     let output = Command::new("podman")
@@ -144,7 +144,7 @@ pub(crate) fn detect_container_storage_path() -> Result<Utf8PathBuf> {
 }
 
 /// Validate that a container storage path exists and has the expected structure
-pub(crate) fn validate_container_storage_path(path: &Utf8Path) -> Result<()> {
+pub fn validate_container_storage_path(path: &Utf8Path) -> Result<()> {
     if !path.exists() {
         return Err(eyre!("Container storage path does not exist: {}", path));
     }
@@ -168,7 +168,7 @@ pub(crate) fn validate_container_storage_path(path: &Utf8Path) -> Result<()> {
 }
 
 /// Parse size string (e.g., "10G", "5120M", "1T") to bytes
-pub(crate) fn parse_size(size_str: &str) -> Result<u64> {
+pub fn parse_size(size_str: &str) -> Result<u64> {
     let size_str = size_str.trim().to_uppercase();
 
     if size_str.is_empty() {
@@ -204,47 +204,4 @@ pub(crate) fn parse_size(size_str: &str) -> Result<u64> {
         .map_err(|_| eyre!("Invalid number in size: {}", number_str))?;
 
     Ok(number * multiplier)
-}
-
-/// Parse a memory string (like "2G", "1024M", "512") to megabytes
-pub(crate) fn parse_memory_to_mb(memory_str: &str) -> Result<u32> {
-    let memory_str = memory_str.trim();
-
-    if memory_str.is_empty() {
-        return Err(eyre!("Memory string cannot be empty"));
-    }
-
-    // Try to strip unit suffix, checking case-insensitively
-    let (number_str, unit) = if let Some(num) = memory_str
-        .strip_suffix('G')
-        .or_else(|| memory_str.strip_suffix('g'))
-    {
-        (num, "GiB")
-    } else if let Some(num) = memory_str
-        .strip_suffix('M')
-        .or_else(|| memory_str.strip_suffix('m'))
-    {
-        (num, "MiB")
-    } else if let Some(num) = memory_str
-        .strip_suffix('K')
-        .or_else(|| memory_str.strip_suffix('k'))
-    {
-        (num, "KiB")
-    } else {
-        // No suffix, assume megabytes
-        (memory_str, "MiB")
-    };
-
-    let number: f64 = number_str
-        .parse()
-        .context("Invalid number in memory specification")?;
-
-    // Use libvirt helper to get bytes per unit
-    let bytes_per_unit =
-        crate::libvirt::unit_to_bytes(unit).ok_or_else(|| eyre!("Unknown unit: {}", unit))? as f64;
-
-    let mib = 1024.0 * 1024.0;
-    let total_mb = (number * bytes_per_unit) / mib;
-
-    Ok(total_mb as u32)
 }

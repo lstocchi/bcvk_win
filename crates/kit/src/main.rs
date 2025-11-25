@@ -11,7 +11,6 @@ mod boot_progress;
 mod cache_metadata;
 #[cfg(target_os = "linux")]
 mod cli_json;
-#[cfg(target_os = "linux")]
 mod common_opts;
 #[cfg(target_os = "linux")]
 mod container_entrypoint;
@@ -21,6 +20,8 @@ mod credentials;
 mod domain_list;
 #[cfg(target_os = "linux")]
 mod ephemeral;
+#[cfg(target_os = "windows")]
+mod hyperv;
 #[cfg(target_os = "linux")]
 mod images;
 #[cfg(target_os = "linux")]
@@ -52,7 +53,6 @@ mod supervisor_status;
 pub(crate) mod systemd;
 #[cfg(target_os = "linux")]
 mod to_disk;
-#[cfg(target_os = "linux")]
 mod utils;
 #[cfg(target_os = "linux")]
 mod xml_utils;
@@ -146,6 +146,12 @@ enum Commands {
     #[cfg(target_os = "linux")]
     #[clap(hide = true)]
     Internals(InternalsOpts),
+
+    #[cfg(target_os = "windows")]
+    Hyperv {
+        #[command(subcommand)]
+        command: hyperv::HypervSubcommands,
+    },
 }
 
 /// Install and configure the tracing/logging system.
@@ -263,6 +269,10 @@ fn main() -> Result<(), Report> {
                 let json = cli_json::dump_cli_json()?;
                 println!("{}", json);
             }
+        },
+        #[cfg(target_os = "windows")]
+        Commands::Hyperv { command } => match command {
+            hyperv::HypervSubcommands::Run(opts) => hyperv::run::run(opts)?,
         },
     }
     tracing::debug!("exiting");
